@@ -1,0 +1,10 @@
+2012-12-26 14:46:31,845 [ INFO] [CreatLog.java:47] setRedisProxyInfo: select num from register where productid=10209;
+
+2012-12-26 14:47:19,578 [ INFO] [CreatLog.java:47] setRedisProxyInfo: select num from register where productid=10209 and time =12122600 group by partnerid;
+
+2012-12-26 14:59:18,752 [ INFO] [CreatLog.java:47] setRedisProxyInfo: select num from login where productid=10209 and time = 12122600 group by partnerid;
+
+2012-12-26 19:36:30,922 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter missionview;
+
+2012-12-26 19:36:49,101 [ INFO] [CreatLog.java:47] setRedisProxyInfo: select num from missionview where productid=10217;
+

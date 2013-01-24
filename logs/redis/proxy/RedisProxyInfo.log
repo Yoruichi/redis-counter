@@ -1,0 +1,38 @@
+2013-01-24 10:47:09,531 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter sign filter{num counted, role,sex, age, class, area, day, id}		main filter{role, day}		distinct filter{id}		group filter{sex, age, class, area, day};
+
+2013-01-24 10:47:32,397 [ INFO] [CreatLog.java:47] setRedisProxyInfo: config set host=192.168.49.74;
+
+2013-01-24 10:47:36,004 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter sign filter{num counted, role,sex, age, class, area, day, id}		main filter{role, day}		distinct filter{id}		group filter{sex, age, class, area, day};
+
+2013-01-24 10:47:51,142 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:48:20,085 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter sign filter{num counted, role,sex, age, class, area, day, id}		main filter{role, day}		distinct filter{id}		group filter{sex, age, class, area, day}ttl filter{day};
+
+2013-01-24 10:48:25,752 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:48:45,759 [ INFO] [CreatLog.java:47] setRedisProxyInfo: set ttl = 60 from sign;
+
+2013-01-24 10:50:25,928 [ INFO] [CreatLog.java:47] setRedisProxyInfo: set ttl=60 from sign;
+
+2013-01-24 10:50:36,698 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:53:41,757 [ INFO] [CreatLog.java:47] setRedisProxyInfo: set ttl=60 from sign;
+
+2013-01-24 10:54:35,771 [ INFO] [CreatLog.java:47] setRedisProxyInfo: config set host=192.168.49.74;
+
+2013-01-24 10:54:43,418 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:54:58,517 [ INFO] [CreatLog.java:47] setRedisProxyInfo: set ttl=60 from sign;
+
+2013-01-24 10:55:08,043 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:59:01,916 [ INFO] [CreatLog.java:47] setRedisProxyInfo: config set host=192.168.49.74;
+
+2013-01-24 10:59:34,025 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:59:45,206 [ INFO] [CreatLog.java:47] setRedisProxyInfo: set ttl=58 from sign;
+
+2013-01-24 10:59:50,993 [ INFO] [CreatLog.java:47] setRedisProxyInfo: desc counter sign;
+
+2013-01-24 10:59:55,529 [ INFO] [CreatLog.java:47] setRedisProxyInfo: exit;
+

@@ -1,0 +1,95 @@
+
+create counter install filter{num counted, developerid, productid,platformid, version, partnerid, time, hour, deviceid}     
+					  main filter{developerid, productid}     
+					  distinct filter{deviceid}     
+					  ttl filter{time}    
+					  group filter{productid,version, partnerid, hour};    
+
+			   create counter register filter{num counted,developerid,productid,platformid,version,partnerid,time,hour,sex,age,area,mobile,userid}     
+					  main filter{developerid,productid}     
+					  distinct filter{userid}     
+					  ttl filter{time}    
+					  excluded filter{hour,sex,age,area,mobile}    
+					  group filter{version,partnerid,hour,sex,age,area,productid,mobile};    
+			   create counter login filter{num counted,developerid,productid,platformid,version,partnerid,time,hour,sex,age,area,level,userid}     
+					  main filter{developerid,productid,time}    
+					  distinct filter{userid}     
+					  ttl filter{time}    
+					  excluded filter{hour,sex,age,area,level}    
+					  group filter{version,partnerid,hour,sex,age,area,level,time};    
+			   create counter sumlogin filter{num counted,developerid,productid,platformid,version,partnerid,hour,sex,age,area,level,userid}     
+					  main filter{developerid,productid}    
+					  distinct filter{userid}     
+					  excluded filter{hour,sex,age,area,level}    
+					  group filter{version,partnerid,hour,sex,age,area,level};    
+			   create counter usetime filter{num counted,developerid,productid,platformid,version,partnerid,time,hour,sex,age,area,level}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  excluded filter{hour,sex,age,area,level}    
+					  group filter{version,partnerid,hour,sex,age,area,level};    
+			   create counter startup filter{num counted,developerid,productid,platformid,version,partnerid,time,hour,sex,age,area,level}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  excluded filter{hour,sex,age,area,level}    
+					  group filter{version,partnerid,hour,sex,age,area,level};    
+			   create counter charge filter{num counted,developerid,productid,platformid,version,partnerid,time,userid}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  distinct filter{userid};    
+			   create counter usetimeInfo filter{num counted,developerid,productid,platformid,version,partnerid,time,usetimelevel}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  group filter{usetimelevel};    
+			    <!--add eventid to main filter by liulin at 2013.1.15> 
+			     <!--add platformid to main filter by liulin at 2013.1.17> 
+			   create counter custom filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label}    
+					  main filter{developerid,productid,platformid,eventid}    
+					  ttl filter{time}    
+					  group filter{eventid,label};  
+			    <!--add eventid to main filter by liulin at 2013.1.15>  
+			     <!--add platformid to main filter by liulin at 2013.1.17>  
+			   create counter customuser filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,userid}    
+					  main filter{developerid,productid,platformid,eventid}    
+					  ttl filter{time}    
+					  group filter{eventid,label}     
+					  distinct filter{userid};   
+			   <!--add eventid to main filter by liulin at 2013.1.15> 
+			    <!--add platformid to main filter by liulin at 2013.1.17> 
+			   create counter customkeyvalue filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}    
+					  main filter{developerid,productid,platformid,eventid,key}    
+					  ttl filter{time}    
+					  group filter{label,key,value};    
+			   <!--add eventid to main filter by liulin at 2013.1.15>
+			    <!--add platformid to main filter by liulin at 2013.1.17> 
+			   create counter customsumvalue filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}    
+					  main filter{developerid,productid,platformid,eventid}    
+					  ttl filter{time}    
+					  group filter{key};    
+			   create counter customvaluesum filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  group filter{key};    
+			   create counter exceptionnum filter{num counted,developerid,productid,platformid,version,partnerid,time,shothashcode}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  group filter{shothashcode};    
+			   create counter exceptiontime filter{num counted,developerid,productid,platformid,version,partnerid,time,shothashcode}    
+					  main filter{developerid,productid}    
+					  ttl filter{time}    
+					  group filter{shothashcode};    
+			   create counter missionview filter{num counted,developerid,productid,platformid,version,partnerid,time,mission}    
+					  main filter{developerid,productid}     
+					  ttl filter{time}    
+					  group filter{mission};    
+			   create counter missionexit filter{num counted,developerid,productid,platformid,version,partnerid,time,mission}    
+					  main filter{developerid,productid}     
+					  ttl filter{time}    
+					  group filter{mission};    
+			   create counter pageview filter{num counted,developerid,productid,platformid,version,partnerid,time,activityname}    
+					  main filter{developerid,productid}     
+					  ttl filter{time}    
+					  group filter{activityname};    
+			   create counter pageexit filter{num counted,developerid,productid,platformid,version,partnerid,time,activityname}    
+					  main filter{developerid,productid}     
+					  ttl filter{time}    
+					  group filter{activityname};    

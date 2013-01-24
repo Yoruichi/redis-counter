@@ -1,0 +1,32 @@
+2013-01-15 20:32:38,145 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter custom filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label}main filter{developerid,productid,eventid}ttl filter{time}group filter{eventid,label};
+
+2013-01-15 20:32:38,539 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter customuser filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,userid}main filter{developerid,productid,eventid}ttl filter{time}group filter{eventid,label}distinct filter{userid};
+
+2013-01-15 20:32:38,562 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter customkeyvalue filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}main filter{developerid,productid,eventid,key}ttl filter{time}group filter{label,key,value};
+
+2013-01-15 20:32:38,579 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter customsumvalue filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}main filter{developerid,productid,eventid}ttl filter{time}group filter{key};
+
+2013-01-15 20:34:44,268 [ INFO] [CreatLog.java:47] setRedisProxyInfo: read /Users/apple/Downloads/updateCustomCounter.rqlinsert customvaluesum set  num=1 {developerid=2000163,productid=10193,platformid=2,version=all,partnerid=75557,time=13011500,eventid=testagainID,label=testagainName,key=meat,value=1 };
+
+2013-01-15 20:34:51,930 [ INFO] [CreatLog.java:47] setRedisProxyInfo: insert customvaluesum set  num=1 {developerid=2000163,productid=10193,platformid=2,version=all,partnerid=75557,time=13011500,eventid=testagainID,label=testagainName,key=meat,value=1 };
+
+2013-01-15 20:35:29,662 [ INFO] [CreatLog.java:47] setRedisProxyInfo: select num from customvaluesum where developerid=2000163;
+
+2013-01-15 20:36:40,750 [ INFO] [CreatLog.java:47] setRedisProxyInfo: config set host=127.0.0.1 and port=6379;
+
+2013-01-15 20:36:59,431 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter custom filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label}main filter{developerid,productid,eventid}ttl filter{time}group filter{eventid,label};
+
+2013-01-15 20:36:59,462 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter customuser filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,userid}main filter{developerid,productid,eventid}ttl filter{time}group filter{eventid,label}distinct filter{userid};
+
+2013-01-15 20:36:59,471 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter customkeyvalue filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}main filter{developerid,productid,eventid,key}ttl filter{time}group filter{label,key,value};
+
+2013-01-15 20:36:59,480 [ INFO] [CreatLog.java:47] setRedisProxyInfo: create counter customsumvalue filter{num counted,developerid,productid,platformid,version,partnerid,time,eventid,label,key,value}main filter{developerid,productid,eventid}ttl filter{time}group filter{key};
+
+2013-01-15 20:37:38,983 [ INFO] [CreatLog.java:47] setRedisProxyInfo: read /Users/apple/Downloads/updateCustomCounter.rqlinsert customvaluesum set  num=1 {developerid=2000163,productid=10193,platformid=2,version=all,partnerid=75557,time=13011500,eventid=testagainID,label=testagainName,key=meat,value=1 };
+
+2013-01-15 20:37:42,390 [ INFO] [CreatLog.java:47] setRedisProxyInfo: insert customvaluesum set  num=1 {developerid=2000163,productid=10193,platformid=2,version=all,partnerid=75557,time=13011500,eventid=testagainID,label=testagainName,key=meat,value=1 };
+
+2013-01-15 20:38:15,755 [ INFO] [CreatLog.java:47] setRedisProxyInfo: insert customsumvalue {developerid=2000163,productid=10193,platformid=2,version=all,partnerid=75557,time=13011500,eventid=testagainID,label=testagainName,key=meat,value=1 };
+
+2013-01-15 20:38:37,770 [ INFO] [CreatLog.java:47] setRedisProxyInfo: select num from customsumvalue where developerid=2000163;
+

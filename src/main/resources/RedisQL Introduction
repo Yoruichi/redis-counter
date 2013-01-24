@@ -1,0 +1,203 @@
+	使用REDIS存储为基础做计数器的功能是一种简单便利的方案。但是对于庞大的key值进行管理是很复杂的。
+	RedisQl是一种类似于SQL形式的语言。可以简单形象的将计数器功能使用起来。
+	一、
+	首先，我们需要建立一个计数器。
+	使用类似于create table语句，如下：
+		create counter sign filter{num counted, role,sex, age, class, area, day, id}
+		main filter{role, day}
+		distinct filter{id}
+		group filter{sex, age, class, area, day};
+	什么意思呢？我们来简单的分析一下。
+	首先的create counter 就是字面上的意思,建立计数器。student 就是这个计数器的名字。filter是关键字,
+表示需要过滤计数的条件，类似于table中的列。filter后面的“{”、“}”中包含的，就是这些filter的名字。其中
+第一项需要定义的是需要计数的filter，在filter名字后面加上counted关键字用来表明该filter是计数filter。
+然后定义各个过滤条件，之间用逗号分隔。
+	继续往后看。main filter是主条件，其中定义的条件应该是全部条件中的某一个或某几个。需要说明的是，主
+要条件的意义在于进行插入和查询的时候，必须填写这些条件的值，所以是否要定义主要条件是根据实际需求来确定的
+，不是必须定义定义出来。（而且从产生key值数量来判断优劣的话，不对main filter定义貌似是会减少key的数量）
+	接下来是distinct filter。很简单，就是需要排重的条件。排重条件自然是唯一的。而另外需要注意的一点就
+是，被定义成了排重条件的话，在进行查询的时候就不会被当做普通过滤条件来过滤，仅仅是在做计数的对该条件进行
+排重计数。在后面的查询分析时会再次说明。
+	最后便是group filter了。也很容易理解，就是分组条件。你可以定义很多可被分组的条件，但是，在这一版中，
+仅支持在查询时对一个定义过的分组条件进行分组查询。或许这个犯二的作者会在后续的更新中添加对多条件分组的支
+持吧，阿门！
+	最最后再说一点，main filter、distinct filter和group filter都不是必须要定义出来的，请根据实际的
+需求来进行选择性的定义。定义的条件越多，在redis存储中产生的key数量也就越多。所以，你懂的。
+	二、
+	首先，二是一个很欢乐的数字。
+	现在我们来看看我们建立的计数器怎么计数。
+	使用insert语句来将记录插入到计数器中。比如：
+	insert sign {role=student,sex=M,
+	age=16,class=2,area=beijing,day=0,id=101 };
+	是不是很简单明了。比SQL中的insert into语句要简单很多吧。insert是关键字，后面加上需要计数的计数器的
+名字。然后一个“{”、“}”将各个定义过的条件的值添加上。其中被定义成counted的filter可以赋值也可以不赋值。如
+果不赋值的话，我们的计数器会默认加1。而distinct filter和main filter是一定要赋值的。至于其他普通filter
+也可以不赋值。这在规则上是被允许的，但是，这样做好像是没有什么意义。（天知道你们会怎么去用）
+	三、
+	好了。建立了计数器也插入了数据，那么我们终于要来看看到底我们在做什么。
+	查询吧。骚年。
+	使用和SQL类似的查询语句，比如我们想查查看今天签到的学生中，男生有多少。可以使用
+	select num from sign where role=student and sex=M and day=0;
+	来做查询。
+	需要说明的是，现在的版本中，所有的过滤条件都是准确的，也就是说不支持“>”、“<”的过滤条件。如果你不想对
+某一个过滤条件加限制的话，可以在查询时对这个该死的条件赋值为“all”，或者直接不写这个碍眼的条件。而如果你想
+对某一个条件附加多个值你可以这样来写“age=12,13,14,15”，没错，用逗号分隔，这样查出来的结果是多个条件查询
+结果的加和值。不同条件之间是用“and”来分隔的。
+	那么，如果我想知道今天签到的学生中，男生女生各有多少。可以使用
+	select num from sign where role=student and day=0 group by sex;
+	来做查询。
+	这里就用到了group by功能。group by 后面加的条件必须是被定义为group filter的条件。而且，正如前面所
+说的，这一版本中仅支持group by 加一个分组条件，如果你忘记了前面我说过的话，那证明你和作者一样二。另外，对
+于group by功能，是支持选定条件并分组的。比如我想看今天签到的学生中，来自北京，上海，山东的男生分别有多少，
+可以选定area条件为北京，上海，山东再按照area进行分组。如下：
+	select num from sign where role = student and sex = F and day=0 and 
+	area=beijing,shanghai,shandong group by area;
+	比较特殊的一个指令是“selectAll”。这个指令的意思是查询被排重的条件一共有多少条数据。对于上一个例子里
+来说，你可以查询一共有多少学生签到了。RedisQL语句这么写：
+	selectAll from sign where role=student;
+	你要问了，如果我没有定义distinct filter的话，使用selectAll会查到什么？你试试就知道了。
+	selectAll也是支持group by功能的。而这里的分组比较特殊，分组的条件必须是main filter同时又是group
+filter才可以拿来进行分组。你可以这么写：
+	selectAll from sign where role=student group by day;
+这样你能获得每一天来签到的学生人数。（其实也可以用语句
+	select num from sign where role=student group by day;
+来查询）
+	五、
+	下面解释一下计数器和redis存储中的对应关系以及存储和查询的过程。
+	1、sky.redis.data.model中类
+	首先我们先来认识一下数据模型包中的各个成员。
+	在建立了一个计数器的时候，会在redis中产生一个以计数器名字为key的string类型，value值是这个计数器的对
+象转换成JSON格式的字符串。那么，计数器的java类的设计是什么样呢？很简单，RCounter.java放在了
+sky.redis.data.model这个包里面。它有一个String类型的name，一个RCounted类型的被计数的对象，还有若干个被
+定义出来的RFilter对象的list，包括全部filter队列的title，和main filter队列的mainTitle，group filter队
+列的groupTitle，distinct filter队列的distinctTitle。
+	RCounter包含了很多方法。除去基本的get set方法之外，还有一系列对应setXXXFinal方法和isXXXFilter方法。
+setXXXFinal方法包含了对main filter、distinct filter和group filter的描述，以及对全部filter的index进
+行初始化赋值。这个index很重要且必要的，因为，程序中是根据这个index来进行redis中key的生成。所以必须要保证
+每个filter的index是固定不变的。另外，这个定义过程是这样的，首先会对所有定义出来的filter进行index赋值，然
+后依次对main filter，group filter，distinct filter进行index赋值，这里的index和最初的index是相同的。
+	那么，认识了RCounter之后，我们来看看RFilter这个类。
+	RFilter.java和RCounter在同一个包里面，它同样包含了一个String类型的name，还有一个int类型的index，这
+个index就是在建立RCounter时进行赋值。另外还有用来表示是不是main filter，group filter，distinct filter
+的boolean类型值。此外，filter还有个String类型的list用来存放这个filter的具体条件值通常会有默认存在的一个
+值“all”。最后，也是最重要的一点，filter有一个filter类型的list.用来存储filter本身的next.这样一来，是不是
+感觉RFliter类有点儿像是某种树型的一个结点？没错，这就是我们的数据模型，一个类似多叉树的东西。而我们所需要的
+redis中的key值，就是这棵树中的某一条路径。这个稍后会详细说明。
+	此外这个包里还有一个RCounted.java类。这个类是用来表示被计数的值。它很简单，只有一个String的name和一个
+long型的value。
+	2、create过程
+	在执行create语句的时候，首先会初始化一个全部属性为空的RCounter.然后获取到你所定义的计数器的名字和你所定
+义的被计数的RCounted的名字。在这之后会创建一个filter的队列，存放你所命名的各个filter.当这些准备工作完成之后，
+对初始化的RCounter进行set操作。其中，在setFilter的时候会对各个filter的index赋值。接下来的工作是对你定义的
+main filter，group filter，distinct filter进行set操作，操作过程是类似的，首先是confirm方法，判断这些被定
+义成特殊filter的条件是否存在，然后对RCounter进行set操作和setXXXFinal操作。最后就是将这个定义出来的RCounter
+变成JSON格式的数据存入以它的名字为key的redis的string类型中。
+	可以说，整个create过程是很简单快速的。而且，在后续的使用过程中，你可以随时对这个计数器进行属性的添加和更改
+而不影响它的使用。这意味着你可以在最开始的时候先把全部的filter定义好，在后来的对你的业务所熟悉之后再来添加各种
+特殊filter的定义。当然，这也意味着我没有对已存在的计数器进行管理，如果你贸贸然的create了一个新的计数器是有可能
+将以前建立的计数器覆盖掉的。所以，我刚刚，真的是刚刚，就在写这篇简介的时候我才发觉了这个问题，提供了一个desc的
+命令，你可以在create之前先使用
+	desc counter sign;
+的语句查看一下这个计数器的描述结构再做打算。
+	3、insert过程
+	3.1、
+	在执行一条insert语句的时候，首先会获取insert后的counter的名字，根据这个名字从redis中读取相对应的key所
+存储的counter的JSON格式的数据，再将数据还原成RCounter的实例。这一步叫做initCounter.然后，会对insert语句中
+的set num=N 进行解析，如果有的话。会获取语句中所提供的值并且将这个值赋给value变量，默认为1，类型为long.第三
+步工作，获取将要计数的记录的各个条件的值，并生成一个list来存储这些filter.
+	3.2、
+	好，准备工作已经完成，下面就是正式的insert过程。首先自然是对记录中的各个filter进行confirm，以保证不会有
+计数器没有定义过的filter出现。并且，如果你定义了distinct filter和main filter的话，此时还会检测记录中是否包
+含这两种特殊的filter.在confirm通过之后，会将记录中各个filter的info信息写入到对应的RCounter的filter list中
+每个filter里，并且按照filter的index序号将各个filter关联起来，从而生成一棵树。
+	3.3、
+	接下来我们要做一次判断，可以称为isNew.是对这次记录中distinct filter的info值和已存储在redis中的所有值做
+比较，如果出现过，那么就不再做重复计数而结束本次insert操作。如果没出现过，则开始做计数。包括对distinct 
+filter的插入，group filter的插入，和全部条件的计数器更新。
+	首先是对distinct filter的插入。很明显需要做排重记录的数据结构是set.在redis中使用set结构存储所有出现过的
+distinct filter的info值。这个set的key的结构是counter name加上main filter的info加上distinct filter的名
+字，之间用“:”分隔。举个例子说明一下，还是签到的计数器，在执行
+	insert sign {num=2,role=student,sex=F,
+	age=16,class=2,area=beijing,day=0,id=101 };
+的时候，会在“sign:student:0:id”的key所对应的set中插入一个member：101.其实不仅仅是这样，还会有另外的三个key
+所对应的set会插入这个101的member.还记得之前我们提到过，在filter的info队列里默认会存在一个值“all”，对吗？没错
+在main filter的info里自然也会有这个特殊值，所以，另外的三个key分别是：
+	sign:student:all:id
+	sign:all:0:id
+	sign:all:all:id
+现在对key的生成规则是不是有点儿感觉了？不要急，后面会有更详细的说明，让我们回到insert过程中继续看。
+	在distinct filter之后是对group filter的记录做插入。group filter的key结构就简单很多，是counter name加
+上group filter name，同样是用“:”分隔。在上面的例子里会在“sign:role”里插入“student”的member。其他group 
+filter不再详述。
+	在两个特殊的filter队列插入完毕之后就是对全部条件的计数器更新。而全部条件生成的计数器的key是对记录的所有条件
+树的一次全集遍历。在刚刚这条记录中就会生成2的6次方的key.就是:role:sex:age:class:area:day:这种结构的一条key.
+因为每个filter默认存在一个叫“all”的info,所以最可能的就是2的N次方的key.这些key如下：
+	:student:F:16:2:beijing:0:
+	:student:F:16:2:beijing:all:
+	.
+	.
+	.
+	:all:all:all:all:all:0:
+	:all:all:all:all:all:all:
+	是不是能大致了解insert的机制了。
+	4、select过程
+	4.1、基本select
+	我们先来写一条基本的select语句看看。
+	select num from sign where role=student and sex=F;
+	这么做的话表示的什么意思呢？很简单，男生签到的人数。role是student 性别是男，这是比较容易看到的，那么，为什么
+是人数而不是签到的次数呢？这就在于我们定义这个计数器的时候设置了一个distinct filter并且是按照id来做排重，这样就
+决定了所做的查询必然是排重的人数，如果想记录次数的话，在定义计数器的时候就不要添加distinct filter.和SQL不同，在
+做对Redis计数的操作的时候，几乎都是先想到要做什么查询和计数，再去定义你的计数器，所以，和数据库有着本质的区别。
+	那么现在我们来看一下select执行的过程。首先，和insert相同也是根据from之后所写的counter name去redis中查询出
+定义这个计数器的数据并且在程序中将它返还成一个RCounter的实例。接着会对select之后的name做confirm，确定在from的
+counter中含有这个name的RCounted.然后，会根据where之后的条件生成查询的key.在程序里，会根据where之后的条件名字做
+一次confirm，确认counter含有这些filter之后，生成一个Map，Map的key是filter的名字，Map的value是一个String的队
+列，接下来将这个Map作为参数传给赋值方法，程序会根据filter的名字将String的队列赋给info.进行查询的过程其实很简单，
+会根据这个filter的队列生成查询的key，和之前insert的过程是类似的，只不过在查询的时候没有填值的条件会赋值为“all”，
+而已赋值的filter不会添加“all”条件。filter队列生成key值的方法其实一个类似于遍历一棵树从根节点到所有叶子结点的算法
+类似，是一个递归的算法。每一个filter都有一个next，作为判断的条件，如果next为null我们认为这个结点就是叶子结点，就
+是终点，那么就应该将走过的路径输出为key，然后回到上一次分叉的地点继续遍历下一个next；而如果还有next的话，很显然应
+该调用next filter的这个方法进行递归。我们将所需要的String类型的info放在一个栈中，因为栈的先进后出的特点很符合我们
+的过程，在递归到终点的时候生成key并且将栈顶的元素弹出即可保证遍历。
+	整个过程是这样的：
+	public void getPath(Stack stack, List<String> list) {
+		stack.push(info);
+		if(next==null){
+			list.add(stack.out());//将栈中已存的info拼接成key并放入list
+		} else {
+			next.getPath(stack, list);
+		}
+		stack.pop();
+	}
+	最终，输入的list就保存了遍历之后的结果集。
+	4.2、group by
+	我们看下面这条查询：
+	select num from sign where role=student group by sex;
+	在基本的查询中添加了group by的功能。过程是什么样的呢？首先和基本查询一样，先获取RCounter的实例，然后进行各种
+confirm，在分析到group by的关键字出现的时候会去调用group by的方法，方法中第一步也是confirm，判断这个跟在group 
+by之后的词是不是属于这个counter的groupFilter队列中。在确认之后会从redis中根据groupFilter的key查询出这个分组条
+件的全部出现的值，并且存放在一个list中，再把这个list作为value存入groupMap中，key就是group by的filter的名字。这
+里有一步操作，这个例子里没有用到，是这样的，如果在where之后的条件里出现了被分组的条件，就会执行这一步，比如：
+	where role=student and sex=F,M group by sex;
+此时，在查询所有sex条件中出现过的值并存入groupMap之后，会对where之后出现条件进行遍历，将其中赋值的被分组的条件sex
+的值取出来替换掉groupMap中对应的list。说起来可能比较麻烦，其实意思很简单，你选了性别为男女，并且分组，那么结果就只
+会有男女两组，而你不选性别为男女直接按照性别分组的话，会按照所有出现过的性别分组，可能会有男、女、未知。就是这么简单。
+那么，在groupMap完成之后，会进行赋值操作。这里的赋值是指把group by的filter的值赋给counter的实例中。到此，group
+by的准备工作完成。下面的工作是和基本查询一样的，生成key并且从redis中查出这些值，然后按照groupMap进行对结果分组，再
+分别对每组数据求和。这里说明一点，这个版本中不提供类似于聚集函数一类的函数体，使用group by功能默认执行的是类似与SQL
+中的sum求和函数，这是出于对计数器本身功能的考虑，后续版本中或会添加其他函数。
+	4.3、selectAll
+	这里有一个特殊的查询关键字。
+	selectAll from sign where role=student;
+	以上面这条语句为例。执行过程和普通select一样，先获取RCounter实例，进行confirm，得到where之后的filter info的
+list.区别在于，selectAll语句中where跟的条件必须是出现在main filter中的过滤条件。
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
